@@ -1,0 +1,200 @@
+PROMPT
+
+
+Atue como um Professor Sênior de Java especializado em Swing e corrija o código abaixo de forma didática e profissional.
+
+O código apresenta erros de execução, estrutura e validação. Faça as seguintes melhorias e correções:
+
+1. Interface e Máscaras:
+- Corrigir a máscara de data para o formato numérico correto (##/##/####).
+- Garantir que o campo de data seja adicionado corretamente ao painel.
+- Corrigir o campo txtQuantidade, garantindo que ele seja inicializado corretamente.
+- Fazer com que o campo quantidade aceite apenas números (usar NumberFormatter ou validação equivalente).
+
+2. Validações:
+- Implementar validação para impedir campos vazios.
+- Validar a data:
+  - Não permitir datas inválidas (ex: 32/13/2025).
+  - Não permitir datas no futuro.
+- Exibir mensagens de erro claras para o usuário.
+
+3. Persistência de Dados:
+- Corrigir o salvamento no arquivo:
+  - Utilizar modo append (true) para não sobrescrever os dados.
+  - Garantir que todos os campos sejam salvos:
+    (data, operador, fornecedor, produto, quantidade e tipo de movimentação).
+- Manter o uso de arquivo .txt para simplicidade.
+
+4. Interface Gráfica:
+- Melhorar a organização visual usando GridLayout com espaçamento.
+- Manter a interface simples, limpa e adequada para nível técnico.
+- Garantir que a janela seja exibida corretamente (setVisible(true)).
+
+5. Código e Didática:
+- Manter o código simples, organizado e fácil de entender.
+- Adicionar comentários explicando as partes principais (máscaras, validação, salvamento).
+- Seguir boas práticas básicas de Java Swing.
+
+Após aplicar todas as correções:
+
+- Retorne o código completo corrigido e funcional (pronto para copiar e colar).
+- Explique de forma breve e didática o que foi corrigido.
+
+Código a ser corrigido:
+(cole aqui o seu código Java)
+
+
+
+
+Código Rodando:
+
+
+import javax.swing.*;
+import javax.swing.text.MaskFormatter;
+import javax.swing.text.NumberFormatter;
+import java.awt.*;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
+public class Genio extends JFrame {
+
+    private JFormattedTextField txtData;
+    private JComboBox<String> cbOperador, cbFornecedor, cbProduto, cbTipoMov;
+    private JFormattedTextField txtQuantidade;
+    private final String ARQUIVO_NOME = "dados_movimentacao.txt";
+
+    public Genio() {
+        setTitle("Sistema de Controle de Movimentação - Versão Beta");
+        setSize(450, 500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel painelPrincipal = new JPanel(new GridLayout(8, 2, 10, 10));
+        painelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // DATA
+        painelPrincipal.add(new JLabel("Data (dd/mm/aaaa):"));
+        try {
+            MaskFormatter mascaraData = new MaskFormatter("##/##/####");
+            mascaraData.setPlaceholderCharacter('_');
+            txtData = new JFormattedTextField(mascaraData);
+        } catch (ParseException e) {
+            txtData = new JFormattedTextField();
+        }
+        painelPrincipal.add(txtData);
+
+        // OPERADOR
+        painelPrincipal.add(new JLabel("Operador:"));
+        cbOperador = new JComboBox<>(new String[]{"José", "Maria", "Joana", "Lucas"});
+        painelPrincipal.add(cbOperador);
+
+        // FORNECEDOR
+        painelPrincipal.add(new JLabel("Fornecedor:"));
+        cbFornecedor = new JComboBox<>(new String[]{"ABC", "WYZ", "XPTO"});
+        painelPrincipal.add(cbFornecedor);
+
+        // PRODUTO
+        painelPrincipal.add(new JLabel("Produto:"));
+        cbProduto = new JComboBox<>(new String[]{"Prod A", "Prod B", "Prod C", "Prod D", "Prod E"});
+        painelPrincipal.add(cbProduto);
+
+        // QUANTIDADE (SÓ NÚMERO)
+        painelPrincipal.add(new JLabel("Quantidade:"));
+        NumberFormatter numberFormatter = new NumberFormatter(NumberFormat.getIntegerInstance());
+        numberFormatter.setAllowsInvalid(false);
+        numberFormatter.setMinimum(0);
+        txtQuantidade = new JFormattedTextField(numberFormatter);
+        painelPrincipal.add(txtQuantidade);
+
+        // TIPO DE MOVIMENTAÇÃO
+        painelPrincipal.add(new JLabel("Tipo de Movimentação:"));
+        cbTipoMov = new JComboBox<>(new String[]{"Entrada", "Saída"});
+        painelPrincipal.add(cbTipoMov);
+
+        // BOTÕES
+        JButton btnSalvar = new JButton("Registrar Movimentação");
+        JButton btnListar = new JButton("Ver Registros");
+        JButton btnSair = new JButton("Sair");
+
+        painelPrincipal.add(btnSalvar);
+        painelPrincipal.add(btnListar);
+        painelPrincipal.add(new JLabel(""));
+        painelPrincipal.add(btnSair);
+
+        add(painelPrincipal);
+
+        btnSalvar.addActionListener(e -> salvarDados());
+        btnListar.addActionListener(e -> exibirRegistros());
+        btnSair.addActionListener(e -> System.exit(0));
+    }
+
+    private void salvarDados() {
+
+        // VALIDAÇÃO DA DATA
+        if (txtData.getText().contains("_")) {
+            JOptionPane.showMessageDialog(this, "Preencha a data corretamente!");
+            return;
+        }
+
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate dataDigitada = LocalDate.parse(txtData.getText(), formatter);
+            LocalDate hoje = LocalDate.now();
+
+            if (dataDigitada.isAfter(hoje)) {
+                JOptionPane.showMessageDialog(this, "A data não pode ser no futuro!");
+                return;
+            }
+
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(this, "Data inválida!");
+            return;
+        }
+
+        // VALIDAÇÃO DA QUANTIDADE
+        if (txtQuantidade.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Informe a quantidade!");
+            return;
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(ARQUIVO_NOME, true))) {
+
+            String registro = "Data: " + txtData.getText()
+                    + " | Operador: " + cbOperador.getSelectedItem()
+                    + " | Fornecedor: " + cbFornecedor.getSelectedItem()
+                    + " | Produto: " + cbProduto.getSelectedItem()
+                    + " | Qtd: " + txtQuantidade.getText()
+                    + " | Tipo: " + cbTipoMov.getSelectedItem();
+
+            writer.write(registro);
+            writer.newLine();
+
+            JOptionPane.showMessageDialog(this, "Salvo com sucesso!");
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage());
+        }
+    }
+
+    private void exibirRegistros() {
+        try {
+            String conteudo = new String(Files.readAllBytes(Paths.get(ARQUIVO_NOME)));
+            JOptionPane.showMessageDialog(this, conteudo);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Arquivo não encontrado.");
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            Genio app = new Genio();
+            app.setVisible(true);
+        });
+    }
+}
