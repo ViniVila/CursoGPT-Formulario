@@ -1,0 +1,145 @@
+✅ PROMPT:
+
+Atue como um Professor Sênior de Java especializado em Swing e corrija o código abaixo de forma didática.
+
+O código apresenta erros de execução e estrutura. Faça as seguintes melhorias e correções:
+
+Corrigir erro na máscara de data (deve ser numérica no formato ##/##/####).
+Corrigir o campo txtQuantidade, que não foi inicializado.
+Adicionar o campo txtData corretamente ao painel (está faltando no layout).
+Corrigir o salvamento no arquivo:
+Não sobrescrever os dados (usar modo append = true).
+Salvar todos os campos do formulário (data, operador, fornecedor, produto, quantidade e tipo).
+Melhorar a organização visual do formulário.
+Garantir que a janela seja exibida corretamente (setVisible(true)).
+Adicionar validação simples (campos não podem estar vazios).
+Manter o código simples, didático e pronto para alunos de nível técnico.
+Comentar o código explicando as partes principais.
+
+Após isso:
+
+Retorne o código completo corrigido e funcional
+Explique rapidamente o que foi corrigido
+
+Código a ser corrigido:
+
+(importar todo seu código aqui)
+
+
+
+
+
+Código Rodando:
+
+
+import javax.swing.*;
+import javax.swing.text.MaskFormatter;
+import java.awt.*;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.ParseException;
+
+public class Genio extends JFrame {
+
+    private JFormattedTextField txtData;
+    private JComboBox<String> cbOperador, cbFornecedor, cbProduto, cbTipoMov;
+    private JTextField txtQuantidade;
+    private final String ARQUIVO_NOME = "dados_movimentacao.txt";
+
+    public Genio() {
+        setTitle("Sistema de Controle de Movimentação - Versão Beta");
+        setSize(450, 500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel painelPrincipal = new JPanel(new GridLayout(8, 2, 10, 10));
+        painelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Campo DATA
+        painelPrincipal.add(new JLabel("Data (dd/mm/aaaa):"));
+        try {
+            MaskFormatter mascaraData = new MaskFormatter("##/##/####");
+            mascaraData.setPlaceholderCharacter('_');
+            txtData = new JFormattedTextField(mascaraData);
+        } catch (ParseException e) {
+            txtData = new JFormattedTextField();
+        }
+        painelPrincipal.add(txtData);
+
+        // Operador
+        painelPrincipal.add(new JLabel("Operador:"));
+        cbOperador = new JComboBox<>(new String[]{"José", "Maria", "Joana", "Lucas"});
+        painelPrincipal.add(cbOperador);
+
+        // Fornecedor
+        painelPrincipal.add(new JLabel("Fornecedor:"));
+        cbFornecedor = new JComboBox<>(new String[]{"ABC", "WYZ", "XPTO"});
+        painelPrincipal.add(cbFornecedor);
+
+        // Produto
+        painelPrincipal.add(new JLabel("Produto:"));
+        cbProduto = new JComboBox<>(new String[]{"Prod A", "Prod B", "Prod C", "Prod D", "Prod E"});
+        painelPrincipal.add(cbProduto);
+
+        // Quantidade
+        painelPrincipal.add(new JLabel("Quantidade:"));
+        txtQuantidade = new JTextField();
+        painelPrincipal.add(txtQuantidade);
+
+        // Tipo de Movimentação
+        painelPrincipal.add(new JLabel("Tipo de Movimentação:"));
+        cbTipoMov = new JComboBox<>(new String[]{"Entrada", "Saída"});
+        painelPrincipal.add(cbTipoMov);
+
+        // Botões
+        JButton btnSalvar = new JButton("Registrar Movimentação");
+        JButton btnListar = new JButton("Ver Registros");
+        JButton btnSair = new JButton("Sair");
+
+        painelPrincipal.add(btnSalvar);
+        painelPrincipal.add(btnListar);
+        painelPrincipal.add(new JLabel(""));
+        painelPrincipal.add(btnSair);
+
+        add(painelPrincipal);
+
+        btnSalvar.addActionListener(e -> salvarDados());
+        btnListar.addActionListener(e -> exibirRegistros());
+        btnSair.addActionListener(e -> System.exit(0));
+    }
+
+    private void salvarDados() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(ARQUIVO_NOME, true))) {
+            String registro = "Data: " + txtData.getText()
+                    + " | Operador: " + cbOperador.getSelectedItem()
+                    + " | Fornecedor: " + cbFornecedor.getSelectedItem()
+                    + " | Produto: " + cbProduto.getSelectedItem()
+                    + " | Qtd: " + txtQuantidade.getText()
+                    + " | Tipo: " + cbTipoMov.getSelectedItem();
+
+            writer.write(registro);
+            writer.newLine();
+
+            JOptionPane.showMessageDialog(this, "Salvo com sucesso!");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage());
+        }
+    }
+
+    private void exibirRegistros() {
+        try {
+            String conteudo = new String(Files.readAllBytes(Paths.get(ARQUIVO_NOME)));
+            JOptionPane.showMessageDialog(this, conteudo);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Arquivo não encontrado.");
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            Genio app = new Genio();
+            app.setVisible(true);
+        });
+    }
+}
